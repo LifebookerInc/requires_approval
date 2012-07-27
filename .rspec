@@ -1,1 +1,5 @@
 --color
+--format nested
+--fail-fast
+-p
+--order random
