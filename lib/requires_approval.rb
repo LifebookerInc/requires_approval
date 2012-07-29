@@ -55,8 +55,6 @@ module RequiresApproval
     true
   end
 
-
-
   # the changes users have requested since the last approval
   def requested_changes
     return {} if self.latest_unapproved_version.blank?
@@ -131,7 +129,6 @@ module RequiresApproval
       # adds our versions table
       self.drop_versions_table
       self.create_versions_table
-
       
     end
 
@@ -142,9 +139,16 @@ module RequiresApproval
 
       # set up delegates
       self.set_up_version_delegates
+
+      # create a blank version before create to handle if no
+      # attributes were ever set
+      self.before_validation(
+        :latest_unapproved_version_with_nil_check,
+        :on => :create
+      )
       
       # create the versions class
-      self.create_version_class
+      self.create_versions_class
       self.has_many :versions, 
         :class_name => self.versions_class_name,
         :foreign_key => self.versions_foreign_key
@@ -182,9 +186,11 @@ module RequiresApproval
     end
 
     # create a class
-    def create_version_class
+    def create_versions_class
       versions_table_name = self.versions_table_name
-      self.const_set "Version", Class.new(ActiveRecord::Base) do
+      
+      self.const_set "Version", Class.new(ActiveRecord::Base)
+      self::Version.class_eval do
         self.table_name = versions_table_name
       end
     end
@@ -218,6 +224,12 @@ module RequiresApproval
           self.send("#{f}_will_change!")
           self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
         end
+      end
+    end
+
+    def validates_approved_field(*args)
+      self.versions_class.class_eval do
+        validates(*args)
       end
     end
 

@@ -108,6 +108,45 @@ describe RequiresApproval do
       version.reload.first_name.should eql("Blah")
     end
 
+    it "should initialize a new latest_unapproved_version with
+      the attributes of the previously approved version" do
+
+      user = User.create(
+        :first_name => "Dan",
+        :last_name => "Langevin"
+      )
+      user.approve_all_attributes
+
+      user.first_name = "Other"
+      user.save
+
+      user.reload
+
+      user.latest_unapproved_version.last_name.should eql("Langevin")
+      user.approve_all_attributes
+
+      user.first_name.should eql("Other")
+      user.last_name.should eql("Langevin")
+
+    end
+
+  end
+
+  context ".validates_approved_field" do
+
+    it "should delegate to the requires_approval field" do
+      User.class_eval do 
+        validates_approved_field :first_name,
+          :presence => true
+      end
+
+      user = User.new
+      user.should_not be_valid
+      errors = user.errors[:"latest_unapproved_version.first_name"]
+      errors.should include "can't be blank"
+
+    end
+
   end
 
   context "#approve_all_attributes" do
@@ -168,10 +207,17 @@ describe RequiresApproval do
         :first_name => "Dan", 
         :last_name => "Langevin"
       )
+      user.approve_all_attributes
+
+      user.update_attributes(
+        :first_name => "Test",
+        :last_name => "User"
+      )
+
       user.deny_attributes(:first_name)
-      user.first_name.should eql(nil)
+      user.first_name.should eql("Dan")
       user.requested_changes.should eql({
-        "last_name" => {"was" => nil, "became" => "Langevin"}
+        "last_name" => {"was" => "Langevin", "became" => "User"}
       })
 
 
