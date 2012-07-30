@@ -64,6 +64,31 @@ describe RequiresApproval do
       
   end
 
+  context "scopes" do
+
+    before(:each) do
+      User.delete_all
+    end
+
+    it "should add an unapproved scope that finds records 
+      that have pending changes" do
+
+      user = User.create!(
+        :first_name => "Dan", 
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      # has unapproved changes
+      User.unapproved.should include user
+
+      # approve them and it should not match the scope
+      user.approve_all_attributes
+      User.unapproved.should_not include user
+
+    end
+
+  end
+
   context "saving" do
 
     it "should create a new version as blank with is_frozen true, is_deleted 

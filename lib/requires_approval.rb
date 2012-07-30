@@ -162,6 +162,11 @@ module RequiresApproval
         ]
     end
 
+    def unapproved
+      includes(:latest_unapproved_version)
+        .where("#{self.versions_table_name}.id IS NOT NULL")
+    end
+
     # the class which our versions are
     def versions_class
       self.versions_class_name.constantize
