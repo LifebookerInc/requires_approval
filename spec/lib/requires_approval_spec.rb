@@ -212,7 +212,7 @@ describe RequiresApproval do
       user.last_name.should be nil
       user.is_frozen.should be false
 
-      user.requested_changes.should eql({
+      user.pending_changes.should eql({
         "last_name" => {"was" => nil, "became" => "Langevin"}
       })
 
@@ -226,7 +226,7 @@ describe RequiresApproval do
   context "#deny_attributes" do
     
     it "should remove the denied attributes from the 
-      requested_changes hash" do
+      pending_changes hash" do
 
       user = User.create(
         :first_name => "Dan", 
@@ -241,7 +241,7 @@ describe RequiresApproval do
 
       user.deny_attributes(:first_name)
       user.first_name.should eql("Dan")
-      user.requested_changes.should eql({
+      user.pending_changes.should eql({
         "last_name" => {"was" => "Langevin", "became" => "User"}
       })
 
@@ -264,6 +264,26 @@ describe RequiresApproval do
       user.deny_attributes(:first_name, :last_name)
       user.latest_unapproved_version.should be nil
 
+    end
+
+  end
+
+  context "#has_pending_changes?" do
+
+    let(:user) do
+      User.new
+    end
+
+    it "should return true if the provider has no outstanding changes" do
+      user.stubs(:pending_changes => {})
+      user.has_pending_changes?.should be false
+    end
+
+    it "should return false if the provider has outstanding changes" do
+      user.stubs(:pending_changes => {
+        "last_name" => {"was" => "L", "became" => "T"}
+      })
+      user.has_pending_changes?.should be true
     end
 
   end

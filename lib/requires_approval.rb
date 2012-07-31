@@ -21,7 +21,7 @@ module RequiresApproval
 
     # if we have approved all requested changes, make our latest
     # unapproved version approved
-    if self.requested_changes.blank?
+    unless self.has_pending_changes?
       self.latest_unapproved_version.update_attribute(:is_approved, true)
     else
       # makes our latest_unapproved_version approved and 
@@ -45,7 +45,7 @@ module RequiresApproval
     end
 
     # if we have denied all changes, remove the record
-    if self.requested_changes.blank?
+    unless self.has_pending_changes?
       self.latest_unapproved_version.destroy
     else
       self.latest_unapproved_version.save
@@ -55,8 +55,13 @@ module RequiresApproval
     true
   end
 
+  # have we already approved all outstanding changes?
+  def has_pending_changes?
+    self.pending_changes.present?
+  end
+
   # the changes users have requested since the last approval
-  def requested_changes
+  def pending_changes
     return {} if self.latest_unapproved_version.blank?
     
     ret = {}
@@ -84,7 +89,7 @@ module RequiresApproval
 
   # creates the record of an individual approval
   def create_approval_version_record
-    outstanding_changes = self.requested_new_attributes
+    outstanding_changes = self.pending_attributes
     # update our old latest_unapproved_version to reflect our changes
     self.latest_unapproved_version.update_attributes(
       self.attributes_requiring_approval.merge(:is_approved => true)
@@ -103,9 +108,9 @@ module RequiresApproval
 
   # ActiveRecord-style attribute hash for the 
   # requested changes
-  def requested_new_attributes
+  def pending_attributes
     ret = {}
-    self.requested_changes.each_pair do |k, change|
+    self.pending_changes.each_pair do |k, change|
       ret[k] = change["became"]
     end
     ret
