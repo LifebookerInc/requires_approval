@@ -1,4 +1,6 @@
 require 'active_record'
+require 'errors'
+
 
 module RequiresApproval
 
@@ -14,8 +16,22 @@ module RequiresApproval
 
   # # approve a list of attributes
   def approve_attributes(*attributes)
-    
-    Array.wrap(attributes).flatten.each do |attr|
+  
+    # validate an normalize our attributes    
+    attributes = self.check_attributes_for_approval(attributes)
+
+    # make sure that all attributes are provided if we have never
+    # been approved
+    fields_not_being_approved = (self.fields_requiring_approval - attributes)
+
+    if fields_not_being_approved.present? && self.never_approved?
+      raise PartialApprovalForNewObject.new(
+        "You must approve #{self.fields_requiring_approval.join(", ")} " + 
+        "for a new #{self.class.name}"
+      )
+    end
+
+    attributes.flatten.each do |attr|
       write_attribute(attr, self.latest_unapproved_version.send(attr))
     end
 
@@ -39,7 +55,13 @@ module RequiresApproval
 
   def deny_attributes(*attributes)
 
-    Array.wrap(attributes).flatten.each do |attr|
+    unless self.has_approved_version?
+      raise DenyingNeverApprovedError.new
+    end
+
+    attributes = self.check_attributes_for_approval(attributes)
+
+    attributes.flatten.each do |attr|
       self.latest_unapproved_version.send("#{attr}=", self.send(attr))
       true
     end
@@ -53,6 +75,11 @@ module RequiresApproval
     
     self.reload
     true
+  end
+
+  # have any of our versions ever been approved?
+  def has_approved_version?
+    self.versions.where(:is_approved => true).count > 0
   end
 
   # have we already approved all outstanding changes?
@@ -87,6 +114,22 @@ module RequiresApproval
     self.attributes.select{|k,v| self.fields_requiring_approval.include?(k)}
   end
 
+  # check if our attributes are valid for approval
+  def check_attributes_for_approval(attributes)
+     # normalize attributes
+    attributes = Array.wrap(attributes).flatten.collect(&:to_s)
+
+    # check for invalid attributes
+    invalid_fields = (attributes - self.fields_requiring_approval)
+    # if we have fields not requiring approval, raise an error
+    if invalid_fields.present?
+      raise InvalidFieldsError.new(
+        "fields_requiring_approval don't include #{invalid_fields.join(",")}"
+      )
+    end
+    attributes
+  end
+
   # creates the record of an individual approval
   def create_approval_version_record
     outstanding_changes = self.pending_attributes
@@ -104,6 +147,11 @@ module RequiresApproval
     self.latest_unapproved_version ||= begin
       self.versions_class.new(self.attributes_requiring_approval)
     end
+  end
+
+  # has this record never been approved?
+  def never_approved?
+    !self.has_approved_version?
   end
 
   # ActiveRecord-style attribute hash for the 

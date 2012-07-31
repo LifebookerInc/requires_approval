@@ -204,20 +204,61 @@ describe RequiresApproval do
         :first_name => "Dan", 
         :last_name => "Langevin"
       )
+      user.approve_all_attributes
+
+      user.update_attributes(
+        :first_name => "New First",
+        :last_name => "New Last"
+      )
 
       user.approve_attributes(:first_name)
 
-      user.first_name.should eql("Dan")
+      user.first_name.should eql("New First")
       # last name was not approved, should still be nil
-      user.last_name.should be nil
+      user.last_name.should eql "Langevin"
       user.is_frozen.should be false
 
       user.pending_changes.should eql({
-        "last_name" => {"was" => nil, "became" => "Langevin"}
+        "last_name" => {"was" => "Langevin", "became" => "New Last"}
       })
 
       # should create an approved version
-      user.versions.where(:is_approved => true).count.should eql(1)
+      user.versions.where(:is_approved => true).count.should be > 0
+
+    end
+
+    it "should throw an error if you try to approve fields that do not require approval
+      or do not exist" do
+
+      user = User.create(
+        :first_name => "Dan", 
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      user.approve_attributes(:first_name, :last_name)
+      user.update_attributes({
+        :first_name => "New Name", 
+        :last_name => "New Last Name"
+      })
+      
+      # doesn't exist
+      lambda{user.approve_attributes(:x)}.should raise_error(RequiresApproval::InvalidFieldsError)
+      # doesn't require approval
+      lambda{user.approve_attributes(:birthday)}.should raise_error(RequiresApproval::InvalidFieldsError)
+
+    end
+
+    it "should throw an error if you try to approve only some of the fields that require approval
+      in a newly created object" do
+
+      user = User.create(
+        :first_name => "Dan", 
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      lambda{user.approve_attributes(:first_name)}.should raise_error(
+        RequiresApproval::PartialApprovalForNewObject
+      )
 
     end
 
@@ -266,6 +307,53 @@ describe RequiresApproval do
 
     end
 
+    it "should throw an error if you try to deny 
+      fields that do not require approval or do not exist" do
+
+      u = User.create( 
+        :first_name => "Dan",
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      u.approve_all_attributes
+
+      u.update_attributes(:first_name => "A", :last_name => "B")
+      
+      # doesn't exist
+      lambda{u.deny_attributes(:x)}.should raise_error(RequiresApproval::InvalidFieldsError)
+      # doesn't require approval
+      lambda{u.deny_attributes(:birthday)}.should raise_error(RequiresApproval::InvalidFieldsError)
+
+    end
+
+    it "should throw an error if you try to deny fields on a never-approved object" do
+      
+      u = User.create( 
+        :first_name => "Dan",
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+
+      lambda{u.deny_attributes(:first_name, :last_name)}.should raise_error(
+        RequiresApproval::DenyingNeverApprovedError
+      )
+    end
+
+  end
+
+   context "#has_approved_version?" do
+
+    it "should return true if a version has ever been approved" do
+      user = User.create(:first_name => "Dan", :last_name => "Langevin")
+      user.approve_all_attributes
+      user.has_approved_version?.should be true
+    end
+
+    it "should return false if no version has ever been approved" do
+      user = User.create(:first_name => "Dan", :last_name => "Langevin")
+      user.has_approved_version?.should be false
+    end
+
   end
 
   context "#has_pending_changes?" do
@@ -287,6 +375,7 @@ describe RequiresApproval do
     end
 
   end
+
 
 
 end

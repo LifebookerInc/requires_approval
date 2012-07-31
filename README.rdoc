@@ -1,6 +1,39 @@
 = requires_approval
 
-Description goes here.
+===Installation
+
+To install, just add requires_approval to your Gemfile
+
+  # Gemfile
+  gem "requires_approval"
+
+=== Activation
+
+To activate, use the requires_approval_for method in your class definition
+
+  # app/models/user.rb
+  # 
+  # - first_name :string
+  # - last_name :string
+  # - birthday :date
+  # - created_at :datetime
+  # - updated_at :datetime
+  
+  class User < ActiveRecord::Base
+    requires_approval_for(:first_name, :last_name)
+  end
+
+And create a migration that adds the necessary table and fields for your
+requires_approval model
+
+  # db/migrate/TIMESTAMP_add_user_versions.rb
+  def self.up
+    User.prepare_tables_for_requires_approval
+  end
+
+
+
+
 
 == Contributing to requires_approval
  
