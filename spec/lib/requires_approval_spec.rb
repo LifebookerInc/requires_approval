@@ -199,12 +199,13 @@ describe RequiresApproval do
 
   end
 
-  context ".validates_approved_field" do
+  context "validation" do
 
     it "should delegate to the requires_approval field" do
       User.class_eval do 
-        validates_approved_field :first_name,
-          :presence => true
+        self.versions_class.class_eval do
+          validates_presence_of :first_name
+        end
       end
 
       user = User.new
@@ -265,7 +266,8 @@ describe RequiresApproval do
       })
 
       # should create an approved version
-      user.versions.where(:is_approved => true).count.should be > 0
+      count = user.versions.count(:conditions => {:is_approved => true})
+      count.should be > 0
 
     end
 

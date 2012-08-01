@@ -4,9 +4,8 @@ require 'errors'
 
 module RequiresApproval
 
-  extend ActiveSupport::Concern
-
-  included do |klass|
+  
+  def self.included(klass)
     klass.send(:extend, ClassMethods)
   end
 
@@ -79,7 +78,7 @@ module RequiresApproval
 
   # have any of our versions ever been approved?
   def has_approved_version?
-    self.versions.where(:is_approved => true).count > 0
+    self.versions.count(:conditions => {:is_approved => true}) > 0
   end
 
   # have we already approved all outstanding changes?
@@ -219,11 +218,10 @@ module RequiresApproval
         :conditions => [
           "#{self.versions_table_name}.is_approved = ?", false
         ]
-    end
 
-    def unapproved
-      includes(:latest_unapproved_version)
-        .where("#{self.versions_table_name}.id IS NOT NULL")
+      self.set_up_scopes
+
+
     end
 
     # the class which our versions are
@@ -293,18 +291,21 @@ module RequiresApproval
       @versions_table_name = opts.delete(:versions_table_name)
     end
 
+    def set_up_scopes
+      self.named_scope(:unapproved, {
+        :include => [:latest_unapproved_version],
+        :conditions => [
+          "#{self.versions_table_name}.id IS NOT NULL"
+        ]
+      })
+    end
+
     def set_up_version_delegates
       self.fields_requiring_approval.each do |f|
         define_method("#{f}=") do |val|
           self.send("#{f}_will_change!")
           self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
         end
-      end
-    end
-
-    def validates_approved_field(*args)
-      self.versions_class.class_eval do
-        validates(*args)
       end
     end
 
