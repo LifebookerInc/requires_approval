@@ -209,12 +209,12 @@ module RequiresApproval
       # create the versions class
       self.create_versions_class
       self.has_many :versions, 
-        :class_name => self.versions_class_name,
+        :class_name => self.versions_class.name,
         :foreign_key => self.versions_foreign_key
 
       self.has_one :latest_unapproved_version,
         :autosave => true,
-        :class_name => self.versions_class_name,
+        :class_name => self.versions_class.name,
         :foreign_key => self.versions_foreign_key,
         :conditions => [
           "#{self.versions_table_name}.is_approved = ?", false
