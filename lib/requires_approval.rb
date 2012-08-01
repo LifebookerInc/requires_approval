@@ -137,6 +137,10 @@ module RequiresApproval
     self.latest_unapproved_version.update_attributes(
       self.attributes_requiring_approval.merge(:is_approved => true)
     )
+    # reload so this unapproved version is out of our cache and will not 
+    # get its foreign key unassigned
+    self.latest_unapproved_version(true)
+
     self.latest_unapproved_version = self.versions_class.new(
       self.attributes_requiring_approval.merge(outstanding_changes)
     )

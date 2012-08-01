@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Langevin"]
   s.date = "2012-07-27"
-  s.description = "TODO: longer description of your gem"
+  s.description = "Gem to handle versioning and things that require approval"
   s.email = "dan.langevin@lifebooker.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
@@ -20,19 +20,23 @@ Gem::Specification.new do |s|
     ".document",
     ".rspec",
     "Gemfile",
+    "Gemfile.lock",
+    "Guardfile",
     "LICENSE.txt",
     "README.rdoc",
     "Rakefile",
     "VERSION",
     "lib/requires_approval.rb",
+    "requires_approval.gemspec",
     "spec/lib/requires_approval_spec.rb",
-    "spec/spec_helper.rb"
+    "spec/spec_helper.rb",
+    "spec/support/BLANK"
   ]
-  s.homepage = "http://github.com/dlangevin/requires_approval"
+  s.homepage = "http://github.com/LifebookerInc/requires_approval"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.11"
-  s.summary = "TODO: one-line summary of your gem"
+  s.summary = "Gem to handle versioning and things that require approval"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
