@@ -190,6 +190,8 @@ module RequiresApproval
     end
 
     def requires_approval_for(*attrs)
+      self.set_options(attrs.extract_options!)
+
       # set up our attributes that require approval
       self.class_attribute :fields_requiring_approval
       self.fields_requiring_approval = attrs.collect(&:to_s)
@@ -226,7 +228,7 @@ module RequiresApproval
 
     # the class which our versions are
     def versions_class
-      self.versions_class_name.constantize
+      "#{self.name}::#{self.versions_class_name}".constantize
     end
 
     protected
@@ -251,8 +253,9 @@ module RequiresApproval
     def create_versions_class
       versions_table_name = self.versions_table_name
       
-      self.const_set "Version", Class.new(ActiveRecord::Base)
-      self::Version.class_eval do
+      self.const_set self.versions_class_name, Class.new(ActiveRecord::Base)
+      
+      self.versions_class.class_eval do
         self.table_name = versions_table_name
       end
     end
@@ -271,6 +274,10 @@ module RequiresApproval
         t.integer self.versions_foreign_key
         t.boolean :is_approved, :default => false
       end
+      self.connection.add_index(
+        self.versions_table_name,
+        [self.versions_foreign_key, :is_approved]
+      )
     end
 
     # drop the versions table if it exists
@@ -278,6 +285,12 @@ module RequiresApproval
       if self.connection.tables.include?(self.versions_table_name)
         self.connection.drop_table(self.versions_table_name)
       end
+    end
+
+    def set_options(opts = {})
+      @versions_class_name = opts.delete(:versions_class_name)
+      @version_foreign_key = opts.delete(:versions_foreign_key)
+      @versions_table_name = opts.delete(:versions_table_name)
     end
 
     def set_up_version_delegates
@@ -297,17 +310,17 @@ module RequiresApproval
 
     # class name for our versions
     def versions_class_name
-      "#{self.base_class.name}::Version"
+      @versions_class_name ||= "Version"
     end
 
     # foreign key for our class on the version table
     def versions_foreign_key
-      "#{self.base_class.name.underscore}_id"
+      @version_foreign_key ||= "#{self.base_class.name.underscore}_id"
     end
 
     # table name for our versions
     def versions_table_name
-      "#{self.base_class.name.underscore}_versions"
+      @versions_table_name ||= "#{self.base_class.name.underscore}_versions"
     end
 
   end

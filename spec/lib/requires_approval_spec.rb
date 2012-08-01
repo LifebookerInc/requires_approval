@@ -61,7 +61,49 @@ describe RequiresApproval do
       end
 
     end
+
+    context "options" do
       
+      before(:all) do
+        conn = ActiveRecord::Base.connection
+        
+        conn.create_table(:posts, :force => true) do |t|
+          t.string(:title)
+          t.string(:body)
+          t.date(:published_at)
+          t.timestamps
+        end
+
+        class Post < ActiveRecord::Base
+          requires_approval_for(:title, :body, {
+            :versions_table_name => "blah_blah",
+            :versions_foreign_key => "test_id",
+            :versions_class_name => "SuperVersion"
+          })
+        end
+        Post.prepare_tables_for_requires_approval
+
+      end
+
+      it "should create a custom-named subclass" do
+        defined?(Post::SuperVersion).should_not be_nil
+      end
+
+      it "should allow for custom table names" do
+        Post::SuperVersion.table_name.should eql("blah_blah")
+      end
+
+      it "should allow for a custom foreign key" do
+        assn = Post.reflect_on_association(:versions)
+        assn.options[:foreign_key].should eql("test_id")
+
+        assn = Post.reflect_on_association(:latest_unapproved_version)
+        assn.options[:foreign_key].should eql("test_id")
+
+      end
+
+    end
+
   end
 
   context "scopes" do
