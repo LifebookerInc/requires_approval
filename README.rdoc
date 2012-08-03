@@ -31,6 +31,75 @@ requires_approval model
     User.prepare_tables_for_requires_approval
   end
 
+This does the equivalent of the the following
+
+  # Generated migration
+  def self.up
+    create_table(:user_versions, :force => true) do |t|
+      t.string(:first_name)
+      t.string(:last_name)
+      t.integer(:user_id)
+      t.boolean(:is_approved)
+      t.timestamps
+    end
+    add_index(:user_versions, [:user_id, :is_approved])
+
+    # starts all new records out as frozen so they don't show up
+    add_column(:users, :is_frozen, :boolean, :default => true)
+
+  end
+
+=== Usage
+
+The first_name and last_name methods are now delegated to the user's
+latest_unapproved_version
+
+  u = User.new
+  u.first_name = "Dan"
+  u.first_name => nil
+  u.latest_unapproved_version.first_name => "Dan"
+  u.pending_changes => {
+    "first_name" => {
+      "was" => nil,
+      "became" => "Dan"
+    }
+  }
+  u.save
+
+  u.approve_attributes(:first_name)
+
+  u.first_name => "Dan"
+  
+  # it created one version and approved it
+  u.versions.count => 1
+
+  # so it won't show up as an unapproved version
+  u.latest_unapproved_version => nil
+  u.pending_changes => {}
+
+==== Denying attributes
+
+You can also deny changes.  If you do so, they just disappear from
+the latest_unapproved_version
+
+  u = User.create(:first_name => "X", :last_name => "Y")
+  u.approve_all_attributes
+
+  u.update_attribute(:first_name => "Dan")
+  u.pending_changes => {
+    "first_name" => {
+      "was" => "X",
+      "became" => "Dan"
+    }
+  }
+
+  u.deny_attributes(:first_name)
+  # no more changes
+  u.pending_changes => {}
+
+FYI, this doesn't actually remove the latest_unapproved_version, it just 
+sets its values to be the same as the values in the parent record.
+
 
 
 
