@@ -4,12 +4,12 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = "requires_approval"
-  s.version = "0.0.1"
+  s.name = "requires_approval_rails_2"
+  s.version = "1.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Langevin"]
-  s.date = "2012-08-01"
+  s.date = "2012-08-05"
   s.description = "Gem to handle versioning and things that require approval"
   s.email = "dan.langevin@lifebooker.com"
   s.extra_rdoc_files = [

@@ -14,7 +14,7 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "requires_approval"
+  gem.name = "requires_approval_rails_2"
   gem.homepage = "http://github.com/LifebookerInc/requires_approval"
   gem.license = "MIT"
   gem.summary = %Q{Gem to handle versioning and things that require approval}
