@@ -344,6 +344,20 @@ describe RequiresApproval do
 
     end
 
+    it "should return true if you approve an already approved
+      record" do
+
+      user = User.create(
+        :first_name => "Dan", 
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      user.approve_all_attributes
+
+      user.approve_all_attributes.should be true
+
+    end
+
   end
 
   context "#deny_attributes" do
