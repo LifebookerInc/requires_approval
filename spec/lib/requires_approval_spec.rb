@@ -219,6 +219,24 @@ describe RequiresApproval do
 
     end
 
+    it "should allow you to modify attributes after an unapproved version
+      has been created" do
+
+      user = User.create(
+        :first_name => "Dan",
+        :last_name => "Langevin"
+      )
+      user.approve_all_attributes
+
+      user.update_attributes(:first_name => "X")
+      user.update_attributes(:first_name => "Dan")
+
+      user.approve_all_attributes
+      user.reload.first_name.should eql("Dan")
+
+    end
+
+
   end
 
   context "validation" do
