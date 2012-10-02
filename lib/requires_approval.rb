@@ -298,9 +298,13 @@ module RequiresApproval
         define_method("#{f}=") do |val|
           # type cast our val so "0" changes to 'false'
           type_casted_val = self.column_for_attribute(f).type_cast(val)
-          # make sure we don't already have this val in the approved
-          # version
-          unless type_casted_val == self.send(f)
+          
+          # if we have a latest_unapproved version already, let it handle
+          # updates - if not, only create one if the type casted value is 
+          # not the same as what is in the parent value
+          if self.latest_unapproved_version.present? || 
+            type_casted_val != self.send(f)
+            
             self.send("#{f}_will_change!")
             self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
           end
