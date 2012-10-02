@@ -16,6 +16,8 @@ module RequiresApproval
   # # approve a list of attributes
   def approve_attributes(*attributes)
   
+    return true unless self.has_pending_changes?
+
     # validate an normalize our attributes    
     attributes = self.check_attributes_for_approval(attributes)
 
