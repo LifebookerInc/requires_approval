@@ -303,8 +303,14 @@ module RequiresApproval
     def set_up_version_delegates
       self.fields_requiring_approval.each do |f|
         define_method("#{f}=") do |val|
-          self.send("#{f}_will_change!")
-          self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
+          # type cast our val so "0" changes to 'false'
+          type_casted_val = self.column_for_attribute(f).type_cast(val)
+          # make sure we don't already have this val in the approved
+          # version
+          unless type_casted_val == self.send(f)
+            self.send("#{f}_will_change!")
+            self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
+          end
         end
       end
     end

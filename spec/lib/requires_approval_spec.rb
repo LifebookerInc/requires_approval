@@ -197,6 +197,28 @@ describe RequiresApproval do
 
     end
 
+    it "should not create new versions when attributes are not actually
+      updated" do
+
+      user = User.create(
+        :first_name => "Dan",
+        :last_name => "Langevin"
+      )
+      user.approve_all_attributes
+      user.reload
+
+      user.latest_unapproved_version.should be nil
+
+      user.update_attributes(
+        :first_name => user.first_name,
+        :last_name => user.last_name
+      )
+      user.reload
+      user.latest_unapproved_version.should be nil
+
+
+    end
+
   end
 
   context "validation" do
