@@ -13,14 +13,41 @@ describe RequiresApproval do
       t.string(:first_name)
       t.string(:last_name)
       t.date(:birthday)
+      t.boolean(:is_alive, :default => true)
       t.timestamps
     end
 
     class User < ActiveRecord::Base
-      requires_approval_for(:first_name, :last_name)
+      requires_approval_for(:first_name, :last_name, :is_alive)
     end
 
     User.prepare_tables_for_requires_approval
+
+  end
+
+  context "#pending_changes" do
+
+    it "gives back all attributes when it is a new record" do
+      user = User.create(
+        :first_name => "Dan", 
+        :last_name => "Test",
+        :is_alive => true
+      )
+      user.pending_changes.should eql({
+        "first_name" => {
+          "was" => nil,
+          "became" => "Dan"
+        },
+        "last_name" => {
+          "was" => nil,
+          "became" => "Test"
+        },
+        "is_alive" => {
+          "was" => nil,
+          "became" => true
+        }
+      })
+    end
 
   end
 
@@ -317,7 +344,7 @@ describe RequiresApproval do
         :last_name => "Langevin",
         :birthday => Date.today
       )
-      user.approve_attributes(:first_name, :last_name)
+      user.approve_attributes(:first_name, :last_name, :is_alive)
       user.update_attributes({
         :first_name => "New Name", 
         :last_name => "New Last Name"

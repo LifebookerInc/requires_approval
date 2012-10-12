@@ -38,8 +38,10 @@ module RequiresApproval
     end
 
     # if we have approved all requested changes, make our latest
-    # unapproved version approved
-    unless self.has_pending_changes?
+    # unapproved version approved - 
+    # this is ALWAYS true for a new record even though its pending_changes
+    # hash is forced to have values
+    if self.is_first_version? || self.no_pending_changes?
       self.latest_unapproved_version.update_attribute(:is_approved, true)
     else
       # makes our latest_unapproved_version approved and 
@@ -89,6 +91,16 @@ module RequiresApproval
     self.pending_changes.present?
   end
 
+  # are we the first version?
+  def is_first_version?
+    !self.has_approved_version?
+  end
+
+  # returns true if there are no changes to approve
+  def no_pending_changes?
+    !self.has_pending_changes?
+  end
+
   # the changes users have requested since the last approval
   def pending_changes
     return {} if self.latest_unapproved_version.blank?
@@ -96,12 +108,17 @@ module RequiresApproval
     ret = {}
     # check each field requiring approval
     self.fields_requiring_approval.each do |field|
+      
       # if it is the same in the unapproved as in the parent table
       # we skip it
-      unless self.send(field) == self.latest_unapproved_version.send(field)
+      if self.is_first_version? || 
+        self.send(field) != self.latest_unapproved_version.send(field)
+        
         # otherwise we get the change set
         ret[field] = {
-          "was" => self.send(field), 
+          # our first version is always nil, regardless of the 
+          # defaults in that table
+          "was" => self.is_first_version? ? nil : self.send(field), 
           "became" => self.latest_unapproved_version.send(field)
         }
       end
