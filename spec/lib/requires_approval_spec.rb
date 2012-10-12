@@ -235,12 +235,12 @@ describe RequiresApproval do
       user.reload
 
       user.latest_unapproved_version.should be nil
-
       user.update_attributes(
         :first_name => user.first_name,
         :last_name => user.last_name
       )
       user.reload
+
       user.latest_unapproved_version.should be nil
 
 

@@ -219,9 +219,8 @@ module RequiresApproval
 
       # create a blank version before create to handle if no
       # attributes were ever set
-      self.before_validation(
-        :latest_unapproved_version_with_nil_check,
-        :on => :create
+      self.before_validation_on_create(
+        :latest_unapproved_version_with_nil_check
       )
       
       # create the versions class
