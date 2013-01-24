@@ -70,9 +70,11 @@ module RequiresApproval
       true
     end
 
-    # if we have denied all changes, remove the record
+    # if we have denied all changes, remove the record and
+    # make sure it isn't frozen
     unless self.has_pending_changes?
       self.latest_unapproved_version.destroy
+      self.update_attribute(:is_frozen, false)
     else
       self.latest_unapproved_version.save
     end

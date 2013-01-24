@@ -462,6 +462,23 @@ describe RequiresApproval do
       )
     end
 
+    it "should set is_frozen to false when denying all attributes" do
+
+      u = User.create( 
+        :first_name => "Dan",
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+      u.approve_all_attributes
+
+      u.update_attributes(:first_name => "Changed!", :is_frozen => true)
+      u.is_frozen?.should eql(true)
+
+      u.deny_attributes(:first_name)
+      u.is_frozen?.should eql(false)
+
+    end
+
   end
 
    context "#has_approved_version?" do
