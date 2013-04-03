@@ -37,24 +37,26 @@ module RequiresApproval
       write_attribute(attr, self.latest_unapproved_version.send(attr))
     end
 
-    # if we have approved all requested changes, make our latest
-    # unapproved version approved - 
-    # this is ALWAYS true for a new record even though its pending_changes
-    # hash is forced to have values
-    if self.is_first_version? || self.no_pending_changes?
-      self.latest_unapproved_version.update_attribute(:is_approved, true)
+    if self.save
+      # if we have approved all requested changes, make our latest
+      # unapproved version approved - 
+      # this is ALWAYS true for a new record even though its pending_changes
+      # hash is forced to have values
+      if self.is_first_version? || self.no_pending_changes?
+        self.latest_unapproved_version.update_attribute(:is_approved, true)
+      else
+        # makes our latest_unapproved_version approved and 
+        # creates another unapproved version with any remaining 
+        # attributes
+        self.create_approval_version_record
+      end
+
+      self.update_attributes(:is_frozen => false)
+      self.reload
+      return true
     else
-      # makes our latest_unapproved_version approved and 
-      # creates another unapproved version with any remaining 
-      # attributes
-      self.create_approval_version_record
+      return false
     end
-
-    self.is_frozen = false
-
-    self.save
-    self.reload
-    true
   end
 
   def deny_attributes(*attributes)

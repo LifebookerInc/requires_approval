@@ -385,6 +385,19 @@ describe RequiresApproval do
 
     end
 
+    it "should not approve the latest unapproved version if it is invalid" do
+
+      user = User.new(
+        :first_name => "Dan", 
+        :last_name => "Langevin",
+        :birthday => Date.today
+      )
+
+      user.stubs(:save => false)
+      user.approve_all_attributes.should eql false
+
+    end
+
   end
 
   context "#deny_attributes" do
