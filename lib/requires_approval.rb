@@ -16,10 +16,10 @@ module RequiresApproval
 
   # # approve a list of attributes
   def approve_attributes(*attributes)
-  
+
     return true unless self.has_pending_changes?
 
-    # validate an normalize our attributes    
+    # validate an normalize our attributes
     attributes = self.check_attributes_for_approval(attributes)
 
     # make sure that all attributes are provided if we have never
@@ -28,7 +28,7 @@ module RequiresApproval
 
     if fields_not_being_approved.present? && self.never_approved?
       raise PartialApprovalForNewObject.new(
-        "You must approve #{self.fields_requiring_approval.join(", ")} " + 
+        "You must approve #{self.fields_requiring_approval.join(", ")} " +
         "for a new #{self.class.name}"
       )
     end
@@ -39,14 +39,14 @@ module RequiresApproval
 
     if self.save
       # if we have approved all requested changes, make our latest
-      # unapproved version approved - 
+      # unapproved version approved -
       # this is ALWAYS true for a new record even though its pending_changes
       # hash is forced to have values
       if self.is_first_version? || self.no_pending_changes?
         self.latest_unapproved_version.update_attribute(:is_approved, true)
       else
-        # makes our latest_unapproved_version approved and 
-        # creates another unapproved version with any remaining 
+        # makes our latest_unapproved_version approved and
+        # creates another unapproved version with any remaining
         # attributes
         self.create_approval_version_record
       end
@@ -80,14 +80,25 @@ module RequiresApproval
     else
       self.latest_unapproved_version.save
     end
-    
+
     self.reload
     true
   end
 
+  def reload
+    if instance_variable_defined?(:@has_approved_version)
+      remove_instance_variable(:@has_approved_version)
+    end
+    super
+  end
+
   # have any of our versions ever been approved?
   def has_approved_version?
-    self.versions.where(:is_approved => true).count > 0
+    unless instance_variable_defined?(:@has_approved_version)
+      @has_approved_version = (self.versions.where(:is_approved => true).count > 0)
+    end
+
+    @has_approved_version
   end
 
   # have we already approved all outstanding changes?
@@ -108,21 +119,21 @@ module RequiresApproval
   # the changes users have requested since the last approval
   def pending_changes
     return {} if self.latest_unapproved_version.blank?
-    
+
     ret = {}
     # check each field requiring approval
     self.fields_requiring_approval.each do |field|
-      
+
       # if it is the same in the unapproved as in the parent table
       # we skip it
-      if self.is_first_version? || 
+      if self.is_first_version? ||
         self.send(field) != self.latest_unapproved_version.send(field)
-        
+
         # otherwise we get the change set
         ret[field] = {
-          # our first version is always nil, regardless of the 
+          # our first version is always nil, regardless of the
           # defaults in that table
-          "was" => self.is_first_version? ? nil : self.send(field), 
+          "was" => self.is_first_version? ? nil : self.send(field),
           "became" => self.latest_unapproved_version.send(field)
         }
       end
@@ -160,7 +171,7 @@ module RequiresApproval
     self.latest_unapproved_version.update_attributes(
       self.attributes_requiring_approval.merge(:is_approved => true)
     )
-    # reload so this unapproved version is out of our cache and will not 
+    # reload so this unapproved version is out of our cache and will not
     # get its foreign key unassigned
     self.latest_unapproved_version(true)
 
@@ -181,7 +192,7 @@ module RequiresApproval
     !self.has_approved_version?
   end
 
-  # ActiveRecord-style attribute hash for the 
+  # ActiveRecord-style attribute hash for the
   # requested changes
   def pending_attributes
     ret = {}
@@ -209,7 +220,7 @@ module RequiresApproval
       # adds our versions table
       self.drop_versions_table
       self.create_versions_table
-      
+
     end
 
     def requires_approval_for(*attrs)
@@ -228,10 +239,10 @@ module RequiresApproval
         :latest_unapproved_version_with_nil_check,
         :on => :create
       )
-      
+
       # create the versions class
       self.create_versions_class
-      self.has_many :versions, 
+      self.has_many :versions,
         :class_name => self.versions_class.name,
         :foreign_key => self.versions_foreign_key
 
@@ -275,9 +286,9 @@ module RequiresApproval
     # create a class
     def create_versions_class
       versions_table_name = self.versions_table_name
-      
+
       self.const_set self.versions_class_name, Class.new(ActiveRecord::Base)
-      
+
       self.versions_class.class_eval do
         self.table_name = versions_table_name
       end
@@ -321,13 +332,13 @@ module RequiresApproval
         define_method("#{f}=") do |val|
           # type cast our val so "0" changes to 'false'
           type_casted_val = self.column_for_attribute(f).type_cast(val)
-          
+
           # if we have a latest_unapproved version already, let it handle
-          # updates - if not, only create one if the type casted value is 
+          # updates - if not, only create one if the type casted value is
           # not the same as what is in the parent value
-          if self.latest_unapproved_version.present? || 
+          if self.latest_unapproved_version.present? ||
             type_casted_val != self.send(f)
-            
+
             self.send("#{f}_will_change!")
             self.latest_unapproved_version_with_nil_check.send("#{f}=", val)
           end

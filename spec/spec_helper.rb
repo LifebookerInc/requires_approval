@@ -13,9 +13,6 @@ Spork.prefork do
   require 'rspec'
   require 'requires_approval'
 
-  require 'ruby-debug'
-  Debugger.start
-
   # Requires supporting files with custom matchers and macros, etc,
   # in ./support/ and its subdirectories.
   Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
