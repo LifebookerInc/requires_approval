@@ -85,11 +85,11 @@ module RequiresApproval
     true
   end
 
-  def reload
+  def reload(*args)
     if instance_variable_defined?(:@has_approved_version)
       remove_instance_variable(:@has_approved_version)
     end
-    super
+    super(*args)
   end
 
   # have any of our versions ever been approved?

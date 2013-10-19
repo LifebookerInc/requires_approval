@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    requires_approval (1.0.7)
+    requires_approval (1.0.8)
       activerecord
       requires_approval
 
