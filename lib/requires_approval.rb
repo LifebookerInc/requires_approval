@@ -359,12 +359,12 @@ module RequiresApproval
 
     # foreign key for our class on the version table
     def versions_foreign_key
-      @version_foreign_key ||= "#{self.base_class.name.underscore}_id"
+      @version_foreign_key ||= "#{self.base_class.name.demodulize.underscore}_id"
     end
 
     # table name for our versions
     def versions_table_name
-      @versions_table_name ||= "#{self.base_class.name.underscore}_versions"
+      @versions_table_name ||= "#{self.base_class.name.demodulize.underscore}_versions"
     end
 
   end
