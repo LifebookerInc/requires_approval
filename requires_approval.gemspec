@@ -14,6 +14,7 @@ Gem::Specification.new do |s|
   s.email = "dan.langevin@lifebooker.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
+    "README.md",
     "README.rdoc"
   ]
   s.files = [
@@ -23,6 +24,7 @@ Gem::Specification.new do |s|
     "Gemfile.lock",
     "Guardfile",
     "LICENSE.txt",
+    "README.md",
     "README.rdoc",
     "Rakefile",
     "VERSION",
@@ -31,6 +33,7 @@ Gem::Specification.new do |s|
     "lib/requires_approval/version.rb",
     "lib/tasks/requires_approval.rake",
     "lib/tasks/test.rake",
+    "requires_approval-1.0.9.gem",
     "requires_approval.gemspec",
     "requires_approval_rails_2.gemspec",
     "spec/lib/requires_approval_spec.rb",
