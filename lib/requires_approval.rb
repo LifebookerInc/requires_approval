@@ -51,7 +51,9 @@ module RequiresApproval
         self.create_approval_version_record
       end
 
-      self.update_attributes(:is_frozen => false)
+      self.is_frozen = false
+      self.save
+
       self.reload
       return true
     else
@@ -219,6 +221,7 @@ module RequiresApproval
 
       # adds our versions table
       self.drop_versions_table
+
       self.create_versions_table
 
     end
@@ -273,12 +276,16 @@ module RequiresApproval
         self.connection.add_column(
           self.table_name, :is_frozen, :boolean, :default => true
         )
+
+        self.attr_accessible(:is_frozen)
       end
       # add is_deleted
       unless self.column_names.include?("is_deleted")
         self.connection.add_column(
           self.table_name, :is_deleted, :boolean, :default => false
         )
+
+        self.attr_accessible(:is_deleted)
       end
       true
     end
@@ -291,6 +298,11 @@ module RequiresApproval
 
       self.versions_class.class_eval do
         self.table_name = versions_table_name
+
+        # Whitelist public attributes
+        # Everything since this class is for internal use only
+        public_attributes = self.column_names.reject{|attr| self.protected_attributes.deny?(attr)}
+        self.attr_accessible(*public_attributes)
       end
     end
 
