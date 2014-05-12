@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    requires_approval (1.0.9)
+    requires_approval (1.0.10)
       requires_approval
 
 GEM

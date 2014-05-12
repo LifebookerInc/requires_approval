@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "requires_approval"
-  s.version = "1.0.9"
+  s.version = "1.0.10"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Langevin"]
@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
     "lib/requires_approval/version.rb",
     "lib/tasks/requires_approval.rake",
     "lib/tasks/test.rake",
-    "requires_approval-1.0.9.gem",
+    "requires_approval-1.0.10.gem",
     "requires_approval.gemspec",
     "requires_approval_rails_2.gemspec",
     "spec/lib/requires_approval_spec.rb",
