@@ -18,6 +18,12 @@ describe RequiresApproval do
     end
 
     class User < ActiveRecord::Base
+      attr_accessible(
+        :birthday,
+        :first_name,
+        :is_alive,
+        :last_name
+      )
       requires_approval_for(:first_name, :last_name, :is_alive)
     end
 
@@ -253,6 +259,7 @@ describe RequiresApproval do
         :first_name => "Dan",
         :last_name => "Langevin"
       )
+
       user.approve_all_attributes
 
       user.update_attributes(:first_name => "X")
@@ -463,7 +470,7 @@ describe RequiresApproval do
     end
 
     it "should throw an error if you try to deny fields on a never-approved object" do
-      
+
       u = User.create( 
         :first_name => "Dan",
         :last_name => "Langevin",
@@ -482,6 +489,7 @@ describe RequiresApproval do
         :last_name => "Langevin",
         :birthday => Date.today
       )
+
       u.approve_all_attributes
 
       u.update_attributes(:first_name => "Changed!", :is_frozen => true)

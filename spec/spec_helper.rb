@@ -1,3 +1,4 @@
+require 'pry'
 require 'rubygems'
 require 'spork'
 #uncomment the following line to use spork with the debugger
