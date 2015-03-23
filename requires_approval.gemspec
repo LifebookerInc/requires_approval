@@ -49,7 +49,6 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<requires_approval>, [">= 0"])
       s.add_runtime_dependency(%q<activerecord>, ["= 3.2.14"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])

@@ -3,7 +3,6 @@ PATH
   specs:
     requires_approval (1.0.12)
       activerecord (= 3.2.14)
-      requires_approval
 
 GEM
   remote: http://rubygems.org/
