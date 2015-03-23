@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "requires_approval"
-  s.version = "1.0.15"
+  s.version = "1.0.16"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Langevin"]
@@ -33,7 +33,6 @@ Gem::Specification.new do |s|
     "lib/requires_approval/version.rb",
     "lib/tasks/requires_approval.rake",
     "lib/tasks/test.rake",
-    "requires_approval-1.0.15.gem",
     "requires_approval.gemspec",
     "requires_approval_rails_2.gemspec",
     "spec/lib/requires_approval_spec.rb",
@@ -50,7 +49,7 @@ Gem::Specification.new do |s|
     s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<requires_approval>, [">= 0"])
+      s.add_development_dependency(%q<activerecord>, ["= 3.2.14"])
       s.add_development_dependency(%q<bundler>, [">= 0"])
       s.add_development_dependency(%q<guard-rspec>, [">= 0"])
       s.add_development_dependency(%q<guard-bundler>, [">= 0"])
@@ -63,7 +62,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<sqlite3>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
     else
-      s.add_dependency(%q<requires_approval>, [">= 0"])
+      s.add_dependency(%q<activerecord>, ["= 3.2.14"])
       s.add_dependency(%q<bundler>, [">= 0"])
       s.add_dependency(%q<guard-rspec>, [">= 0"])
       s.add_dependency(%q<guard-bundler>, [">= 0"])
@@ -77,7 +76,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<yard>, [">= 0"])
     end
   else
-    s.add_dependency(%q<requires_approval>, [">= 0"])
+    s.add_dependency(%q<activerecord>, ["= 3.2.14"])
     s.add_dependency(%q<bundler>, [">= 0"])
     s.add_dependency(%q<guard-rspec>, [">= 0"])
     s.add_dependency(%q<guard-bundler>, [">= 0"])

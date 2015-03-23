@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "requires_approval_rails_2"
-  s.version = "1.0.15"
+  s.version = "1.0.16"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Dan Langevin"]
