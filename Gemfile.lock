@@ -47,7 +47,7 @@ GEM
       git (>= 1.2.5)
       rake
       rdoc
-    json (1.7.5)
+    json (1.8.6)
     listen (0.4.7)
       rb-fchange (~> 0.0.5)
       rb-fsevent (~> 0.9.1)
