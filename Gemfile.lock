@@ -47,7 +47,6 @@ GEM
       git (>= 1.2.5)
       rake
       rdoc
-    json (1.7.5)
     listen (0.4.7)
       rb-fchange (~> 0.0.5)
       rb-fsevent (~> 0.9.1)
@@ -70,8 +69,7 @@ GEM
     rb-fsevent (0.9.1)
     rb-inotify (0.8.8)
       ffi (>= 0.5.0)
-    rdoc (3.12)
-      json (~> 1.4)
+    rdoc (6.3.1)
     rspec (2.11.0)
       rspec-core (~> 2.11.0)
       rspec-expectations (~> 2.11.0)
